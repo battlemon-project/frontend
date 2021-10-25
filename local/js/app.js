@@ -193,50 +193,51 @@ window.addEventListener('load', () => {
 
 	/* * */
 
+	function initSliders() {
+		let winRateSlider = document.getElementById('win-rate');
 
-	let winRateSlider = document.getElementById('win-rate');
+		if (winRateSlider != null) {
 
-	if (winRateSlider != null) {
-
-		noUiSlider.create(winRateSlider, {
-			start: 30,
-			behaviour: 'snap',
-			range: {
-				'min': [0],
-				'max': [100]
-			},
-		});
-
-		let winRateValWrap = document.querySelector('#win-rate .noUi-touch-area');
-
-		if (winRateValWrap != null) {
-			winRateSlider.noUiSlider.on('update', function (values) {
-
-				winRateValWrap.innerHTML = parseInt(values) + `%`;
-
+			noUiSlider.create(winRateSlider, {
+				start: 30,
+				behaviour: 'snap',
+				range: {
+					'min': [0],
+					'max': [100]
+				},
 			});
+
+			let winRateValWrap = document.querySelector('#win-rate .noUi-touch-area');
+
+			if (winRateValWrap != null) {
+				winRateSlider.noUiSlider.on('update', function (values) {
+
+					winRateValWrap.innerHTML = parseInt(values) + `%`;
+
+				});
+			}
 		}
-	}
 
-	let raritySlider = document.getElementById('rarity');
+		let raritySlider = document.getElementById('rarity');
 
-	if (raritySlider != null) {
+		if (raritySlider != null) {
 
-		noUiSlider.create(raritySlider, {
-			start: 60,
-			behaviour: 'snap',
-			range: {
-				'min': [0],
-				'max': [100]
-			},
-		});
-
-		let rarityValWrap = document.querySelector('#rarity .noUi-touch-area');
-
-		if (rarityValWrap != null) {
-			raritySlider.noUiSlider.on('update', function (values) {
-				rarityValWrap.innerHTML = parseInt(values) + `%`;
+			noUiSlider.create(raritySlider, {
+				start: 60,
+				behaviour: 'snap',
+				range: {
+					'min': [0],
+					'max': [100]
+				},
 			});
+
+			let rarityValWrap = document.querySelector('#rarity .noUi-touch-area');
+
+			if (rarityValWrap != null) {
+				raritySlider.noUiSlider.on('update', function (values) {
+					rarityValWrap.innerHTML = parseInt(values) + `%`;
+				});
+			}
 		}
 	}
 });
