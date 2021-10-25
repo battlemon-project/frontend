@@ -17,15 +17,36 @@ const wallet = new nearApi.WalletConnection(near);
 const account = await near.account("nft.battlemon.testnet");
 
 const contract = new nearApi.Contract(
-  account, // the account object that is connecting
+  account,
   "nft.battlemon.testnet",
   {
-    // name of contract you're connecting to
-    viewMethods: ["nft_total_supply"], // view methods do not change state but usually return a value
-    sender: account, // account object to initialize and sign transactions.
+    viewMethods: ["nft_total_supply", "nft_tokens"],
+    sender: account,
   }
 );
 
-contract.nft_total_supply().then(value => {
-	console.log(value);
+contract.nft_tokens().then(data => {
+	if(data != null) {
+		jsNftList.innerHTML = '';
+
+		let newH = '';
+
+		data.forEach(item => {
+			let tmpl = tmplNftPreview.innerHTML;
+
+			let values = {
+				url: '/item/?id=' + item.token_id,
+				img: item.metadata.media
+			};
+
+			['url', 'img'].forEach(i => {
+				tmpl = tmpl.replaceAll('#' + i + '#', values[i]);
+			});
+
+			newH += tmpl;
+
+		});
+
+		jsNftList.innerHTML = newH;
+	}
 });

@@ -240,4 +240,6 @@ window.addEventListener('load', () => {
 			}
 		}
 	}
+
+	initSliders();
 });
