@@ -208,7 +208,7 @@ if(wallet.isSignedIn()) {
 	}));
 }
 
-if(jsItemDetailPage != null) {
+if(typeof(jsItemDetailPage) != 'undefined') {
 	let itemId = jsItemDetailPage.dataset.id;
 
 	contract.nft_token({token_id: itemId}).then(data => {
