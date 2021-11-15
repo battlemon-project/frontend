@@ -16,14 +16,12 @@ const near = await nearApi.connect(config);
 
 const wallet = new nearApi.WalletConnection(near);
 
-console.log(wallet.isSignedIn());
-
 const account = await near.account(contractName);
 
 const contract = new nearApi.Contract(
   account, contractName,
   {
-    viewMethods: ["nft_total_supply", "nft_tokens", "buy"],
+    viewMethods: ["nft_total_supply", "nft_tokens", "nft_token", "buy"],
     sender: account,
   }
 );
@@ -38,158 +36,165 @@ window.fillTemplate = (template, values) => {
 	return html;
 }
 
-window.initFilterSliders = () => {
-	document.querySelectorAll('.slider[data-values]').forEach(slider => {
-		let values = slider.dataset.values.split(',');
-		let min = Math.min.apply(null, values);
-		let max = Math.max.apply(null, values);
+if(typeof(jsNftList) != 'undefined') {
+	window.initFilterSliders = () => {
+		document.querySelectorAll('.slider[data-values]').forEach(slider => {
+			let values = slider.dataset.values.split(',');
+			let min = Math.min.apply(null, values);
+			let max = Math.max.apply(null, values);
 
-		let sliderOb = noUiSlider.create(slider, {
-			start: parseInt(min),
-			behaviour: 'snap',
-			range: {
-				'min': [parseInt(min)],
-				'max': [parseInt(max)]
-			},
-		});
-
-		sliderOb.on('update', (values) => {
-			console.log(values, slider.querySelectorAll('.noUi-touch-area'));
-			slider.querySelector('.noUi-touch-area').innerHTML = parseInt(values[0]);
-		});
-	});
-}
-
-window.applyFilter = () => {
-	Array.from(jsNftList.children).forEach(item => {
-		let index = item.dataset.index;
-		let data = window.cards[index];
-		let props = data.properties;
-
-		let hide = false;
-
-		if(jsSearchField.value) {
-			hide = !jsSearchField.token_id.toLowerCase().startsWith(jsSearchField.value.toLowerCase());
-		}
-
-		if(!hide) {
-			jsMainFilter.querySelectorAll(':checked').forEach(checkbox => {
-				if(props[checkbox.name] != checkbox.value) {
-					hide = true;
-				}
+			let sliderOb = noUiSlider.create(slider, {
+				start: parseInt(min),
+				behaviour: 'snap',
+				range: {
+					'min': [parseInt(min)],
+					'max': [parseInt(max)]
+				},
 			});
-		}
 
-		if(!hide) {
-			jsMainFilter.querySelectorAll('.slider').forEach(slider => {
-				hide = parseInt(props[slider.dataset.name]) != parseInt(slider.noUiSlider.get());
+			sliderOb.on('update', (values) => {
+				console.log(values, slider.querySelectorAll('.noUi-touch-area'));
+				slider.querySelector('.noUi-touch-area').innerHTML = parseInt(values[0]) + '%';
 			});
-		}
+		});
+	}
 
-		item.style.display = hide ? 'none' : '';
-	});
-}
+	window.applyFilter = () => {
+		Array.from(jsNftList.children).forEach(item => {
+			let index = item.dataset.index;
+			let data = window.cards[index];
+			let props = data.properties;
 
-contract.nft_tokens().then(data => {
-	console.log(data);
-	if(data != null) {
-		jsNftList.innerHTML = '';
+			let hide = false;
 
-		let newH = '';
-
-		let props = {};
-
-		window.cards = {};
-
-		data.forEach(item => {
-			window.cards[item.token_id] = item;
-
-			let values = {
-				url: '/item/?id=' + item.token_id,
-				img: item.metadata.media,
-				id: item.token_id
-			};
-
-			if(values.img == 'blabla') {
-				values.img = '/local/img/fighters-23.webp';
+			if(jsSearchField.value) {
+				console.log(jsSearchField.token_id);
+				hide = !jsSearchField.token_id.toLowerCase().startsWith(jsSearchField.value.toLowerCase());
 			}
 
-			let tmpl = fillTemplate(tmplNftPreview, values);
+			if(!hide) {
+				jsMainFilter.querySelectorAll(':checked').forEach(checkbox => {
+					if(props[checkbox.name] != checkbox.value) {
+						hide = true;
+					}
+				});
+			}
 
-			newH += tmpl;
+			if(!hide) {
+				jsMainFilter.querySelectorAll('.slider').forEach(slider => {
+					hide = parseInt(props[slider.dataset.name]) != parseInt(slider.noUiSlider.get());
+				});
+			}
 
-			if('properties' in item) {
-				for(let prop_code in item.properties) {
-					let value = item.properties[prop_code];
+			item.style.display = hide ? 'none' : '';
+		});
+	}
 
-					if(!(prop_code in props)) {
-						props[prop_code] = [value];
-					} else {
-						if(props[prop_code].indexOf(value) < 0) {
-							props[prop_code].push(value);
+	contract.nft_tokens().then(data => {
+		if(data != null) {
+			jsNftList.innerHTML = '';
+
+			let newH = '';
+
+			let props = {};
+
+			window.cards = {};
+
+			data.forEach((item, i) => {
+				window.cards[item.token_id] = item;
+
+				let values = {
+					url: '/item/?id=' + item.token_id,
+					img: item.metadata.media,
+					id: item.token_id,
+					order: data.length - i
+				};
+
+				if(values.img == 'blabla') {
+					values.img = '/local/img/fighters-23.webp';
+				}
+
+				let tmpl = fillTemplate(tmplNftPreview, values);
+
+				newH += tmpl;
+
+				if('properties' in item) {
+					for(let prop_code in item.properties) {
+						let value = item.properties[prop_code];
+
+						if(!(prop_code in props)) {
+							props[prop_code] = [value];
+						} else {
+							if(props[prop_code].indexOf(value) < 0) {
+								props[prop_code].push(value);
+							}
 						}
 					}
 				}
-			}
 
-		});
+			});
 
-		if(props) {
-			let filterHTML = '';
-			for(let prop_code in props) {
-				if(typeof(props[prop_code][0]) == 'number') {
-					let values = {
-						name: prop_code,
-						values: props[prop_code].join(',')
-					}
-
-					let sliderHTML = fillTemplate(tmplFilterSlider, values);
-
-					filterHTML += sliderHTML;
-
-				} else {
-					let listHTML = '';
-
-					props[prop_code].forEach(value => {
+			if(props) {
+				let filterHTML = '';
+				for(let prop_code in props) {
+					if(typeof(props[prop_code][0]) == 'number') {
 						let values = {
-							code: prop_code,
-							name: value,
-							value: value
+							rname: prop_code.replaceAll('_', ' '),
+							name: prop_code,
+							values: props[prop_code].join(',')
+						}
+
+						let sliderHTML = fillTemplate(tmplFilterSlider, values);
+
+						filterHTML += sliderHTML;
+
+					} else {
+						let listHTML = '';
+
+						props[prop_code].forEach(value => {
+							let values = {
+								code: prop_code,
+								name: value.replaceAll('_', ' '),
+								value: value
+							};
+
+							let checkboxHTML = fillTemplate(tmplFilterItemCheckbox, values);
+
+							listHTML += checkboxHTML;
+						});
+
+						let values = {
+							rname: prop_code.replaceAll('_', ' '),
+							name: prop_code,
+							list: listHTML
 						};
 
-						let checkboxHTML = fillTemplate(tmplFilterItemCheckbox, values);
+						let itemHTML = fillTemplate(tmplFilterItem, values);
 
-						listHTML += checkboxHTML;
-					});
-
-					let values = {
-						name: prop_code,
-						list: listHTML
-					};
-
-					let itemHTML = fillTemplate(tmplFilterItem, values);
-
-					filterHTML += itemHTML;
+						filterHTML += itemHTML;
+					}
 				}
+
+				jsMainFilter.innerHTML += filterHTML;
+
+				initFilterSliders();
+				jsMainFilter.querySelectorAll('[type="checkbox"]').forEach(checkBox => checkBox.addEventListener('change', applyFilter));
 			}
 
-			jsMainFilter.innerHTML += filterHTML;
+			jsNftList.innerHTML = newH;
 
-			initFilterSliders();
-			jsMainFilter.querySelectorAll('[type="checkbox"]').forEach(checkBox => checkBox.addEventListener('change', applyFilter));
+			if(typeof(jsSortToogler) != 'undefined') {
+				jsSortToogler.addEventListener('click', function() {
+					this.classList.toggle('active');
+					jsNftList.classList.toggle('sort-reverse');
+				});
+			}
 		}
-
-		jsNftList.innerHTML = newH;
-	}
-});
-
-if(typeof(jsSortToogler) != 'undefined') {
-	jsSortToogler.addEventListener('click', function() {
-		this.classList.toggle('active');
-		jsNftList.classList.toggle('sort-reverse');
 	});
 }
 
+
+// Auth
 if(wallet.isSignedIn()) {
 	const accountId = wallet.getAccountId();
 	document.querySelectorAll('.login-form-toggle span').forEach(loginBtn => {
@@ -201,4 +206,35 @@ if(wallet.isSignedIn()) {
 	    contractName,
 	  );
 	}));
+}
+
+if(jsItemDetailPage != null) {
+	let itemId = jsItemDetailPage.dataset.id;
+
+	contract.nft_token({token_id: itemId}).then(data => {
+		console.log(data);
+
+		let properties = data.properties;
+
+		if(properties != null) {
+			if(properties.winrate != null) {
+				jsWinRate.innerHTML = properties.winrate + '%';
+			}
+
+			if(jsBuyNow != null) {
+				jsBuyNow.addEventListener('click', function() {
+					if(wallet.isSignedIn()) {
+						contract.buy({token_id: this.dataset.id}).catch(e => {
+							console.error(e)
+						}).then(data => {
+
+						});
+						
+					} else {
+						document.querySelector('.login-form-toggle').click();
+					}
+				});
+			}
+		}
+	});
 }
