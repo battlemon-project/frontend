@@ -61,7 +61,7 @@ window.initFilterSliders = () => {
 }
 
 window.applyFilter = () => {
-	jsNftList.childNodes.forEach(item => {
+	Array.from(jsNftList.children).forEach(item => {
 		let index = item.dataset.index;
 		let data = window.cards[index];
 		let props = data.properties;
@@ -69,21 +69,25 @@ window.applyFilter = () => {
 		let hide = false;
 
 		if(jsSearchField.value) {
-			hide = jsSearchField.token_id == jsSearchField.value;
+			hide = !jsSearchField.token_id.toLowerCase().startsWith(jsSearchField.value.toLowerCase());
 		}
 
 		if(!hide) {
 			jsMainFilter.querySelectorAll(':checked').forEach(checkbox => {
-				if(prop[checkbox.name] != checkbox.value) {
+				if(props[checkbox.name] != checkbox.value) {
 					hide = true;
 				}
 			});
 		}
 
 		if(!hide) {
-
+			jsMainFilter.querySelectorAll('.slider').forEach(slider => {
+				hide = parseInt(props[slider.dataset.name]) != parseInt(slider.noUiSlider.get());
+			});
 		}
-	})
+
+		item.style.display = hide ? 'none' : '';
+	});
 }
 
 contract.nft_tokens().then(data => {
@@ -95,9 +99,11 @@ contract.nft_tokens().then(data => {
 
 		let props = {};
 
-		window.cards = data;
+		window.cards = {};
 
 		data.forEach(item => {
+			window.cards[item.token_id] = item;
+
 			let values = {
 				url: '/item/?id=' + item.token_id,
 				img: item.metadata.media,
@@ -132,7 +138,6 @@ contract.nft_tokens().then(data => {
 			let filterHTML = '';
 			for(let prop_code in props) {
 				if(typeof(props[prop_code][0]) == 'number') {
-					console.log('its a number');
 					let values = {
 						name: prop_code,
 						values: props[prop_code].join(',')
@@ -177,6 +182,13 @@ contract.nft_tokens().then(data => {
 		jsNftList.innerHTML = newH;
 	}
 });
+
+if(typeof(jsSortToogler) != 'undefined') {
+	jsSortToogler.addEventListener('click', function() {
+		this.classList.toggle('active');
+		jsNftList.classList.toggle('sort-reverse');
+	});
+}
 
 if(wallet.isSignedIn()) {
 	const accountId = wallet.getAccountId();
