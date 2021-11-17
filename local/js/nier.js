@@ -235,8 +235,7 @@ if(typeof(jsItemDetailPage) != 'undefined') {
 			if(jsBuyNow != null) {
 				jsBuyNow.addEventListener('click', function() {
 					if(wallet.isSignedIn()) {
-						market.buy({token_id: this.dataset.id, account_id: wallet.getAccountId()}, 10, 200000000000000).catch(e => {
-							debugger;
+						market.buy({token_id: this.dataset.id}, 10, 200000000000000, wallet.getAccountId()).catch(e => {
 							console.error(e)
 						}).then(data => {
 
