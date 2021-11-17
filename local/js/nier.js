@@ -2,7 +2,8 @@
 
 import * as nearAPI from "/node_modules/near-api-js/dist/near-api-js.min.js";
 
-const contractName = 'dev-1636641321126-54010839869553';
+const contractName = 'dev-1637055909702-24257615114075';
+const marketName = 'market.dev-1637055909702-24257615114075';
 
 const config = {
   networkId: "testnet",
@@ -21,7 +22,7 @@ const account = await near.account(contractName);
 const contract = new nearApi.Contract(
   account, contractName,
   {
-    viewMethods: ["nft_total_supply", "nft_tokens", "nft_token", "buy"],
+    viewMethods: ["nft_total_supply", "nft_tokens", "nft_token"],
     sender: account,
   }
 );
@@ -110,7 +111,7 @@ if(typeof(jsNftList) != 'undefined') {
 					order: data.length - i
 				};
 
-				if(values.img == 'blabla') {
+				if(values.img == 'blabla' || values.img == 'http://some-link-to-media.com') {
 					values.img = '/local/img/fighters-23.webp';
 				}
 
@@ -200,6 +201,16 @@ if(wallet.isSignedIn()) {
 	document.querySelectorAll('.login-form-toggle span').forEach(loginBtn => {
 		loginBtn.innerHTML = accountId
 	});
+
+	const userAccount = await near.account(accountId);
+
+	window.market = new nearApi.Contract(
+		userAccount, marketName,
+		{
+			changeMethods: ["buy"],
+			sender: accountId
+		}
+	);
 } else {
 	document.querySelectorAll('.login-form-toggle').forEach(loginBtn => loginBtn.addEventListener('click', function() {
 	  wallet.requestSignIn(
@@ -224,7 +235,8 @@ if(typeof(jsItemDetailPage) != 'undefined') {
 			if(jsBuyNow != null) {
 				jsBuyNow.addEventListener('click', function() {
 					if(wallet.isSignedIn()) {
-						contract.buy({token_id: this.dataset.id}).catch(e => {
+						market.buy({token_id: this.dataset.id, account_id: wallet.getAccountId()}, 10, 200000000000000).catch(e => {
+							debugger;
 							console.error(e)
 						}).then(data => {
 
