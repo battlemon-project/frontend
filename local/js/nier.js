@@ -208,7 +208,7 @@ if(wallet.isSignedIn()) {
 		userAccount, marketName,
 		{
 			changeMethods: ["buy"],
-			sender: accountId
+			sender: userAccount
 		}
 	);
 } else {
