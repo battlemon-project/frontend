@@ -1,9 +1,9 @@
 'use strict';
 
-import * as nearAPI from "/node_modules/near-api-js/dist/near-api-js.min.js";
+import * as nearAPI from "/node_modules/near-api-js/dist/near-api-js.js";
 
-const contractName = 'dev-1637055909702-24257615114075';
-const marketName = 'market.dev-1637055909702-24257615114075';
+const contractName = 'dev-1637164324288-46265801137064';
+const marketName = 'market.dev-1637164324288-46265801137064';
 
 const config = {
   networkId: "testnet",
@@ -196,6 +196,12 @@ if(typeof(jsNftList) != 'undefined') {
 
 
 // Auth
+
+window.logout = () => {
+	wallet.signOut();
+	location.reload();
+}
+
 if(wallet.isSignedIn()) {
 	const accountId = wallet.getAccountId();
 	document.querySelectorAll('.login-form-toggle span').forEach(loginBtn => {
@@ -213,9 +219,12 @@ if(wallet.isSignedIn()) {
 	);
 } else {
 	document.querySelectorAll('.login-form-toggle').forEach(loginBtn => loginBtn.addEventListener('click', function() {
-	  wallet.requestSignIn(
-	    contractName,
-	  );
+	  wallet.requestSignIn({
+	    contractId: marketName,
+	    methodNames: ['buy'],
+	    successUrl: location.href,
+	    failureUrl: location.href
+	  });
 	}));
 }
 
@@ -223,7 +232,13 @@ if(typeof(jsItemDetailPage) != 'undefined') {
 	let itemId = jsItemDetailPage.dataset.id;
 
 	contract.nft_token({token_id: itemId}).then(data => {
-		console.log(data);
+		window.token = data;
+
+		if(typeof(window.token.approved_account_ids[marketName]) == 'number')  {
+			jsTokenPrice.innerHTML = window.token.approved_account_ids[marketName];
+		} else {
+			jsTokenPriceBox.style.display = 'none';
+		}
 
 		let properties = data.properties;
 
@@ -235,12 +250,15 @@ if(typeof(jsItemDetailPage) != 'undefined') {
 			if(jsBuyNow != null) {
 				jsBuyNow.addEventListener('click', function() {
 					if(wallet.isSignedIn()) {
-						market.buy({token_id: this.dataset.id}, 10, 200000000000000, wallet.getAccountId()).catch(e => {
-							console.error(e)
-						}).then(data => {
-
-						});
-						
+						if(typeof(window.token.approved_account_ids[marketName]) == 'number')  {
+							market.buy({token_id: this.dataset.id}, 10, 200000000000000).catch(e => {
+								console.error(e);
+							}).then(data => {
+								console.log('buy result', data);
+							});
+						} else {
+							alert('Selected token not approved for buying');
+						}
 					} else {
 						document.querySelector('.login-form-toggle').click();
 					}
