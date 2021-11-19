@@ -99,6 +99,8 @@ if(typeof(jsNftList) != 'undefined') {
 
 			let props = {};
 
+			
+
 			window.cards = {};
 
 			data.forEach((item, i) => {
