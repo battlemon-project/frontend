@@ -1,6 +1,6 @@
 'use strict';
 
-import * as nearAPI from "/battlemon/frontend-main/node_modules/near-api-js/dist/near-api-js.js";
+import * as nearAPI from "/node_modules/near-api-js/dist/near-api-js.js";
 
 const contractName = 'dev-1637164324288-46265801137064';
 const marketName = 'market.dev-1637164324288-46265801137064';
