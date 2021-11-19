@@ -99,8 +99,6 @@ if(typeof(jsNftList) != 'undefined') {
 
 			let props = {};
 
-			
-
 			window.cards = {};
 
 			data.forEach((item, i) => {
@@ -253,15 +251,8 @@ if(typeof(jsItemDetailPage) != 'undefined') {
 				jsBuyNow.addEventListener('click', function() {
 					if(wallet.isSignedIn()) {
 						if(typeof(window.token.approved_account_ids[marketName]) == 'number')  {
-<<<<<<< Updated upstream
-							market.buy({token_id: this.dataset.id}, 10, 200000000000000).catch(e => {
-=======
-							console.log('price:', nearApi.utils.format.parseNearAmount('' + window.token.approved_account_ids[marketName]));
 							market.buy({token_id: this.dataset.id}, '300000000000000', window.token.approved_account_ids[marketName]).catch(e => {
->>>>>>> Stashed changes
 								console.error(e);
-							}).then(data => {
-								console.log('buy result', data);
 							});
 						} else {
 							alert('Selected token not approved for buying');
