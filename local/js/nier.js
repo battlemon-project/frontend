@@ -1,6 +1,6 @@
 'use strict';
 
-import * as nearAPI from "/node_modules/near-api-js/dist/near-api-js.js";
+import * as nearAPI from "/battlemon/frontend-main/node_modules/near-api-js/dist/near-api-js.js";
 
 const contractName = 'dev-1637164324288-46265801137064';
 const marketName = 'market.dev-1637164324288-46265801137064';
@@ -208,13 +208,13 @@ if(wallet.isSignedIn()) {
 		loginBtn.innerHTML = accountId
 	});
 
-	const userAccount = await near.account(accountId);
-
+    const walletConnection = new nearApi.WalletConnection(near, config.contractName)
+	const userAccount = walletConnection.account();
+	
 	window.market = new nearApi.Contract(
 		userAccount, marketName,
 		{
-			changeMethods: ["buy"],
-			sender: userAccount
+			changeMethods: ["buy"]
 		}
 	);
 } else {
@@ -251,7 +251,7 @@ if(typeof(jsItemDetailPage) != 'undefined') {
 				jsBuyNow.addEventListener('click', function() {
 					if(wallet.isSignedIn()) {
 						if(typeof(window.token.approved_account_ids[marketName]) == 'number')  {
-							market.buy({token_id: this.dataset.id}, 10, 200000000000000).catch(e => {
+							market.buy({token_id: this.dataset.id}, '200000000000000', window.token.approved_account_ids[marketName] + '000000000000000000000000').catch(e => {
 								console.error(e);
 							}).then(data => {
 								console.log('buy result', data);
