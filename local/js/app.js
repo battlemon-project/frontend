@@ -154,6 +154,14 @@ window.addEventListener('load', () => {
 		this.classList.toggle('active');
 		document.querySelector('header').classList.toggle('nav-open');
 	});
+	
+	let paPrevewToggle = document.querySelector('.pa-preview');
+	
+	if (paPrevewToggle != null) {
+		paPrevewToggle.addEventListener('click', function() {
+			this.classList.toggle('active');			
+		});
+	}
 
 	let filterToggleBtn = document.querySelector('.filter-toggle');
 
