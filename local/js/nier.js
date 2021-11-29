@@ -204,11 +204,23 @@ window.logout = () => {
 
 if(wallet.isSignedIn()) {
 	const accountId = wallet.getAccountId();
-	document.querySelectorAll('.login-form-toggle span').forEach(loginBtn => {
-		loginBtn.innerHTML = accountId
+
+	jsLoginBox.style.display = 'none';
+	jsUserBox.style.display = '';
+
+	jsUserBox.querySelector('.name').innerHTML = accountId;
+
+	jsUserChange.addEventListener('click', function() {
+		logout();
 	});
 
 	const userAccount = await near.account(accountId);
+
+	userAccount.getAccountBalance().then(data => {
+		console.log(data);
+
+		jsUserBox.querySelector('.wallet-val').innerHTML = parseFloat(nearApi.utils.format.formatNearAmount(data.total)).toFixed(2);
+	});
 
 	window.market = new nearApi.Contract(
 		userAccount, marketName,
