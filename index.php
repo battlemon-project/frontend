@@ -2,7 +2,7 @@
 <div class="container">
 	<div class="media-wrap">
 		<div class="img-box">
-			<video src="/local/others/trailer.mp4" autoplay="" muted="" loop="" playsinline=""></video>
+			<video src="/local/others/trailer-2.mp4" autoplay="" muted="" loop="" playsinline=""></video>
 		</div>
 	</div>
 
